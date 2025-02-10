@@ -1,0 +1,13 @@
+[package]
+name = "x-math"
+version = "0.1.0"
+edition = "2024"
+authors = ["666rayen999"]
+description = "fast math"
+license = "MIT"
+readme = "README.md"
+
+[features]
+default = ["acc"]
+acc = []
+sse = []

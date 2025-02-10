@@ -192,12 +192,30 @@ XMath :: struct {
         }
     }
 
+    cbrt :: inline (x: float32) -> float32 #must {
+        // www.mdpi.com/1996-1073/14/4/1058
+
+        s := sign(x);
+        x = abs(x);
+        i := trans(x, u32);
+        i = 0x548c2b4b - (i / 3);
+        y := trans(i, float32);
+        c := x * y * y * y;
+        y *= 0h3fe04c03 + c * (0h3f0266d9 * c + 0hbfa01f36);
+        d := x * y * y;
+        c = d - d * d * y;
+        c = c * 0h3eaaaaab + d;
+        return s * c;
+    }
+
     rsqrt :: inline (x: float32) -> float32 #must {
         #if CPU == .X64 {
             ret := *x;
             #asm SSE { rsqrtss r:, [ret]; movss [ret], r; }
             return ret.*;
         } else {
+            // en.wikipedia.org/wiki/Fast_inverse_square_root#Overview_of_the_code
+
             i := trans(x, u32);
             y := x * .5;
             i = 0x5f3759df - (i >> 1);

@@ -126,6 +126,26 @@ pub fn sqrt(x: f32) -> f32 {
 }
 
 #[inline]
+pub fn cbrt(x: f32) -> f32 {
+    // www.mdpi.com/1996-1073/14/4/1058
+
+    const A: f32 = f32::from_bits(0x3fe04c03);
+    const B: f32 = f32::from_bits(0x3f0266d9);
+    const C: f32 = f32::from_bits(0xbfa01f36);
+
+    let s = sign(x);
+    let x = abs(x);
+    let i = 0x548c2b4b - (x.to_bits() / 3);
+    let y = f32::from_bits(i);
+    let c = x * y * y * y;
+    let y = y * (A + c * (B * c + C));
+    let d = x * y * y;
+    let c = d - d * d * y;
+    let c = c * f32::from_bits(0x3eaaaaab) + d;
+    s * c
+}
+
+#[inline]
 pub fn rsqrt(x: f32) -> f32 {
     #[cfg(feature = "sse")]
     unsafe {
@@ -133,6 +153,8 @@ pub fn rsqrt(x: f32) -> f32 {
     }
     #[cfg(not(feature = "sse"))]
     {
+        // en.wikipedia.org/wiki/Fast_inverse_square_root#Overview_of_the_code
+
         let y = x * 0.5;
         let mut x = f32::from_bits(0x5f3759df - (x.to_bits() >> 1));
 

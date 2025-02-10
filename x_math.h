@@ -116,10 +116,27 @@ inline float x_sqrt(float x) {
 #endif  // X_MATH_SSE
 }
 
+inline float x_cbrt(float x) {
+  // www.mdpi.com/1996-1073/14/4/1058
+
+  float s = x_sign(x);
+  x = x_abs(x);
+  uint32_t i = *(uint32_t*)&x;
+  i = 0x548c2b4b - (i / 3);
+  float y = *(float*)&i;
+  float c = x * y * y * y;
+  y *= h(0x3fe04c03) + c * (h(0x3f0266d9) * c + h(0xbfa01f36));
+  float d = x * y * y;
+  c = d - d * d * y;
+  c = c * h(0x3eaaaaab) + d;
+  return s * c;
+}
+
 inline float x_rsqrt(float x) {
 #ifdef X_MATH_SSE
   return _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(x)));
 #else
+  // en.wikipedia.org/wiki/Fast_inverse_square_root#Overview_of_the_code
   uint32_t i = *(uint32_t*)&x;
   float y = x * 0.5f;
   i = 0x5f3759df - (i >> 1);
